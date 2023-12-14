@@ -2,8 +2,10 @@ pub mod awscredentials;
 pub mod uploader;
 
 use std::{
+    collections::HashMap,
     pin::Pin,
     str::FromStr,
+    string::String,
     sync::{Arc, Mutex}, fmt::Debug,
 };
 
@@ -119,6 +121,7 @@ impl RadosGW {
             content_md5: object_metadata.content_md5.clone(),
             content_type: object_metadata.content_type.clone(),
             expires: object_metadata.expires.clone(),
+            metadata: extract_metadata_headers(object_metadata),
             ..Default::default()
         };
 
@@ -149,6 +152,7 @@ impl RadosGW {
             content_language: object_metadata.content_language.clone(),
             content_type: object_metadata.content_type.clone(),
             expires: object_metadata.expires.clone(),
+            metadata: extract_metadata_headers(object_metadata),
             ..Default::default()
         };
 
@@ -568,5 +572,13 @@ impl Provider for RadosGW {
 
         let x: Box<dyn ProviderResponse> = Box::new(RadosGWResponse::new(object));
         Ok(x)
+    }
+}
+
+fn extract_metadata_headers(object_metadata: &ProviderObjectMetadata) -> Option<HashMap<String, String>> {
+    // only returns the content-md5 header for now
+    match object_metadata.content_md5 {
+        None => None,
+        _ => Some(HashMap::from([(String::from("content-md5"), object_metadata.content_md5.clone().unwrap())]))
     }
 }

@@ -175,7 +175,7 @@ impl From<rusoto_s3::HeadObjectOutput> for ProviderObjectMetadata {
             content_disposition: value.content_disposition,
             content_encoding: value.content_encoding,
             content_language: value.content_language,
-            content_md5: None,
+            content_md5: value.metadata.and_then(|md| md.get("content-md5").cloned()),
             expires: value.expires,
         }
     }
