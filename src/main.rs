@@ -111,11 +111,11 @@ async fn migrate_command(params: &ArgMatches) -> anyhow::Result<()> {
         .map(|s: &String| s.to_owned());
     let source_access_key: String = params
         .get_one::<String>("source-access-key")
-        .unwrap()
+        .expect("Missing source-access-key parameter")
         .to_string();
     let source_secret_key: String = params
         .get_one::<String>("source-secret-key")
-        .unwrap()
+        .expect("Missing source-secret-key parameter")
         .to_string();
     let source_endpoint = params
         .get_one::<String>("source-endpoint")
@@ -139,15 +139,15 @@ async fn migrate_command(params: &ArgMatches) -> anyhow::Result<()> {
         .unwrap_or_default();
     let destination_access_key = params
         .get_one::<String>("destination-access-key")
-        .unwrap()
+        .expect("Missing destination-access-key parameter")
         .to_string();
     let destination_secret_key = params
         .get_one::<String>("destination-secret-key")
-        .unwrap()
+        .expect("Missing destination-secret-key parameter")
         .to_string();
     let destination_endpoint = params
         .get_one::<String>("destination-endpoint")
-        .unwrap()
+        .expect("Missing destination-endpoint parameter")
         .to_string();
 
     if source_bucket.is_none() && destination_bucket.is_some() {
