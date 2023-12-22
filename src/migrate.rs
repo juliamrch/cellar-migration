@@ -344,22 +344,31 @@ pub async fn migrate_bucket(
                     }
                     BucketObjectsMigrationResult::Executed(mut results) => {
                         while let Some(result) = results.pop() {
-                            let mut result = result.unwrap();
-                            total_files_sync += result.sync_results.len();
-                            total_files_delete += result.delete_results.len();
-
-                            event!(Level::TRACE, "Synced results: {:#?}", result.sync_results);
-                            event!(Level::TRACE, "Deleted results: {:#?}", result.delete_results);
-
-                            while let Some(res) = result.sync_results.pop() {
-                                match res {
-                                    Ok(size) => total_synced_size += size,
-                                    Err(err) => {
-                                        event!(Level::WARN, "Failed to sync a file: {:?}", err);
-                                        sync_errors.push(anyhow::anyhow!(err));
+                            match result {
+                                Ok(mut result) => {
+                                    total_files_sync += result.sync_results.len();
+                                    total_files_delete += result.delete_results.len();
+                    
+                                    event!(Level::TRACE, "Synced results: {:#?}", result.sync_results);
+                                    event!(Level::TRACE, "Deleted results: {:#?}", result.delete_results);
+                    
+                                    while let Some(res) = result.sync_results.pop() {
+                                        match res {
+                                            Ok(size) => total_synced_size += size,
+                                            Err(err) => {
+                                                event!(Level::WARN, "Failed to sync a file: {:?}", err);
+                                                sync_errors.push(anyhow::anyhow!(err));
+                                            }
+                                        };
                                     }
-                                };
+                                },
+                                Err(e) => {
+                                    // Log the error and continue with the next file
+                                    event!(Level::ERROR, "Failed to process result: {:?}", e);
+                                }
                             }
+                        }
+                    }
 
                             event!(Level::INFO,
                                 "Current sync status: {} synced objects for a total size of {}",
