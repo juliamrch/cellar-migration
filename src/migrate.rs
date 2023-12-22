@@ -549,6 +549,7 @@ pub async fn create_destination_buckets(
                     }
                 },
             };
+            };
         } else {
             event!(
                 Level::INFO,
